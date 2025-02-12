@@ -6,11 +6,11 @@ import { roleMiddleware } from "../middleware/roleMiddleware";
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Create a new project (Admins only)
+// ✅ Create a new project
 router.post("/", authMiddleware, roleMiddleware(["admin"]), async (req, res) => {
     try {
         const { name, description } = req.body;
-        const project = await prisma.project.create({
+        const project = await prisma.projects.create({ // 🔹 Change to `projects`
             data: { name, description }
         });
         res.status(201).json(project);
@@ -19,20 +19,20 @@ router.post("/", authMiddleware, roleMiddleware(["admin"]), async (req, res) => 
     }
 });
 
-// Get all projects (Anyone)
+// ✅ Get all projects
 router.get("/", authMiddleware, async (req, res) => {
     try {
-        const projects = await prisma.project.findMany();
+        const projects = await prisma.projects.findMany(); // 🔹 Change to `projects`
         res.json(projects);
     } catch (error) {
         res.status(500).json({ error: "Error fetching projects" });
     }
 });
 
-// Get a single project by ID (Anyone)
+// ✅ Get a single project by ID
 router.get("/:id", authMiddleware, async (req, res) => {
     try {
-        const project = await prisma.project.findUnique({
+        const project = await prisma.projects.findUnique({ // 🔹 Change to `projects`
             where: { id: Number(req.params.id) }
         });
         if (!project) return res.status(404).json({ error: "Project not found" });
@@ -42,11 +42,11 @@ router.get("/:id", authMiddleware, async (req, res) => {
     }
 });
 
-// Update a project (Admins only)
+// ✅ Update a project
 router.patch("/:id", authMiddleware, roleMiddleware(["admin"]), async (req, res) => {
     try {
         const { name, description } = req.body;
-        const project = await prisma.project.update({
+        const project = await prisma.projects.update({ // 🔹 Change to `projects`
             where: { id: Number(req.params.id) },
             data: { name, description }
         });
@@ -56,10 +56,10 @@ router.patch("/:id", authMiddleware, roleMiddleware(["admin"]), async (req, res)
     }
 });
 
-// Delete a project (Admins only)
+// ✅ Delete a project
 router.delete("/:id", authMiddleware, roleMiddleware(["admin"]), async (req, res) => {
     try {
-        await prisma.project.delete({
+        await prisma.projects.delete({ // 🔹 Change to `projects`
             where: { id: Number(req.params.id) }
         });
         res.json({ message: "Project deleted" });
