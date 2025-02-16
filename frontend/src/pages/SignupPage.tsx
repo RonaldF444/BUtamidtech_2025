@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import './SignupPage.css';
 
 const SignupPage = () => {
   const [email, setEmail] = useState("");
@@ -25,36 +26,46 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center">
-      <form onSubmit={handleSignup} className="bg-white p-8 shadow-md rounded">
-        <h2 className="text-xl font-bold mb-4">Signup</h2>
-        {error && <p className="text-red-500">{error}</p>}
-        <input
-          type="text"
-          placeholder="Username"
-          className="border p-2 w-full mb-2"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          className="border p-2 w-full mb-2"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="border p-2 w-full mb-4"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button className="bg-green-500 text-white p-2 w-full">Signup</button>
-      </form>
+    <div className="signup-container">
+      <div className="signup-card">
+        <h2 className="signup-title">Sign Up</h2>
+        {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+        <form onSubmit={handleSignup}>
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="signup-button">
+            Sign Up
+          </button>
+        </form>
+        <p className="login-text">
+          Already have an account? <a href="/" style={{ color: '#3b82f6' }}>Login</a>
+        </p>
+      </div>
     </div>
   );
 };
