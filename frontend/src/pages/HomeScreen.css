@@ -22,6 +22,10 @@ body {
     background-color: #42B5E8; /* Ensure blue background applies */
 }
 
+/* Login Button */
+
+
+
 .overlay {
     display: none; /* Remove dark overlay if not needed */
 }
@@ -94,6 +98,7 @@ body {
 }
 
 
+/*navigation bar*/
 .header {
     position: fixed;
     top: 0;
@@ -106,6 +111,17 @@ body {
     padding: 15px 40px;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
     z-index: 1000;
+}
+
+/* Login Button */
+.login-button {
+    border: 2px solid #3b82f6 !important;
+    color: #3b82f6 !important;
+    font-weight: bold !important;
+    padding: 6px 15px !important;
+    border-radius: 20px !important;
+    background: transparent !important;
+    transition: all 0.3s ease;
 }
 
 /* Logo */
@@ -184,3 +200,4 @@ body {
     padding: 5px 15px !important;
     border-radius: 20px !important;
 }
+

@@ -24,6 +24,10 @@ const HomeScreen = () => {
                 <div className="header-buttons">
                     <input type="text" placeholder="🔍" className="search-bar" />
                     <Button variant="contained" className="donate-button">Donate</Button>
+                    <Button variant="outlined" className="login-button" onClick={() => navigate("/login")}>
+    Login
+</Button>
+
                 </div>
             </header>
 
