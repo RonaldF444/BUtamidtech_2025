@@ -1,0 +1,193 @@
+.user-profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    background-color: #f9fafb;
+    min-height: 100vh;
+    position: relative;
+    z-index: 10;
+    display: block !important;
+  }
+  
+  .profile-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .profile-header h1 {
+    font-size: 2rem;
+    color: #333;
+    margin: 0;
+  }
+  
+  .profile-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  @media (min-width: 768px) {
+    .profile-card {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+  }
+  
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #3b82f6;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .profile-avatar {
+      margin-right: 2rem;
+      margin-bottom: 0;
+    }
+  }
+  
+  .profile-details {
+    flex: 1;
+  }
+  
+  .profile-name {
+    font-size: 1.5rem;
+    margin: 0 0 0.25rem 0;
+    color: #333;
+  }
+  
+  .profile-email {
+    color: #666;
+    margin: 0 0 1.5rem 0;
+  }
+  
+  .profile-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .profile-info-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .info-label {
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .info-value {
+    color: #333;
+  }
+  
+  .role-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .role-badge.admin {
+    background-color: #fecaca;
+    color: #b91c1c;
+  }
+  
+  .role-badge.user {
+    background-color: #e0f2fe;
+    color: #0369a1;
+  }
+  
+  .role-badge.member {
+    background-color: #e0f2fe;
+    color: #0369a1;
+  }
+  
+  .profile-actions {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+  }
+  
+  .action-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    border: none;
+  }
+  
+  .action-button.primary {
+    background-color: #3b82f6;
+    color: white;
+  }
+  
+  .action-button.primary:hover {
+    background-color: #2563eb;
+  }
+  
+  .action-button.secondary {
+    background-color: #f3f4f6;
+    color: #374151;
+  }
+  
+  .action-button.secondary:hover {
+    background-color: #e5e7eb;
+  }
+  
+  .action-button:active {
+    transform: translateY(1px);
+  }
+  
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    color: #666;
+    font-size: 1.125rem;
+  }
+  
+  .error-message {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .retry-button {
+    display: block;
+    margin: 1rem auto;
+    padding: 0.5rem 1rem;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .retry-button:hover {
+    background-color: #2563eb;
+  }
