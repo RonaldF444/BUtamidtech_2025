@@ -2,11 +2,19 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 
 const router = express.Router();
 const prisma = new PrismaClient();
 const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
+
+// Interface to extend Request with user property
+interface AuthRequest extends Request {
+  user?: {
+    id: number;
+    role: string;
+  };
+}
 
 // Type for Prisma error
 interface PrismaError extends Error {
@@ -15,6 +23,29 @@ interface PrismaError extends Error {
     target?: string[];
   };
 }
+
+// Authentication middleware
+const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    console.log("No authorization header found");
+    return res.status(401).json({ message: "No token provided" });
+  }
+  
+  try {
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+    
+    const decoded = jwt.verify(token, SECRET_KEY) as { id: number, role: string };
+    req.user = decoded; // Attach user to request
+    next();
+  } catch (error) {
+    console.error("Token verification error:", error);
+    return res.status(401).json({ message: "Invalid token" });
+  }
+};
 
 // Register a new user
 router.post("/register", async (req: Request, res: Response) => {
@@ -107,17 +138,17 @@ router.post("/login", async (req: Request, res: Response) => {
 });
 
 // Get current user profile
-router.get("/profile", async (req: Request, res: Response) => {
+router.get("/profile", authMiddleware, async (req: AuthRequest, res: Response) => {
     try {
-        // Extract user ID from token
-        const authHeader = req.headers.authorization;
-        if (!authHeader) return res.status(401).json({ message: "No token provided" });
+        console.log("Profile request received, user ID:", req.user?.id);
         
-        const token = authHeader.split(' ')[1];
-        const decoded = jwt.verify(token, SECRET_KEY) as { id: number };
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "User ID not found in token" });
+        }
         
         const user = await prisma.users.findUnique({
-            where: { user_id: decoded.id },
+            where: { user_id: userId },
             select: {
                 user_id: true,
                 username: true,
@@ -128,8 +159,12 @@ router.get("/profile", async (req: Request, res: Response) => {
             }
         });
         
-        if (!user) return res.status(404).json({ message: "User not found" });
+        if (!user) {
+            console.log(`User with ID ${userId} not found in database`);
+            return res.status(404).json({ message: "User not found" });
+        }
         
+        console.log("User profile fetched successfully:", user.user_id);
         res.json({ user });
     } catch (error: unknown) {
         console.error("Profile fetch error:", error);
