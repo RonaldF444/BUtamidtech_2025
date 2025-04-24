@@ -7,6 +7,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  PRESIDENT
+  TECH_DIRECTOR
+  DIRECTOR
+  E_BOARD
+  PROJECT_MANAGER
+  MEMBER
+  CLIENT
+}
+
+enum Track {
+  EDUCATION
+  INVESTMENT_FUND
+  CONSULTING
+  TECH_CONSULTING
+}
+
 model projects {
   id          Int       @id @default(autoincrement())
   name        String    @db.VarChar(255)
@@ -32,6 +49,6 @@ model users {
   email      String    @unique @db.VarChar(100)
   password   String    @db.VarChar(255)
   created_at DateTime? @default(now()) @db.Timestamp(6)
-  role       String?   @default("user") @db.VarChar(50)
-  track      String?   @default("education") @db.VarChar(50)
+  role       UserRole  @default(MEMBER)
+  track      Track     @default(EDUCATION)
 }

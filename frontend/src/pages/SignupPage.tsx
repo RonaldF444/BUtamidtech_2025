@@ -23,8 +23,8 @@ const SignupPage = () => {
         email,
         password,
         username,
-        role: "user",
-        track: "education" // Explicitly set the default track
+        role: "MEMBER",
+        track: "EDUCATION"
       });
       
       console.log("Signup response:", response.data);
