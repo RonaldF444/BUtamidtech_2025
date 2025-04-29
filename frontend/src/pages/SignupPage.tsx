@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import './SignupPage.css';
 
@@ -86,10 +86,11 @@ const SignupPage = () => {
           <button type="submit" className="signup-button" disabled={loading}>
             {loading ? "Signing Up..." : "Sign Up"}
           </button>
+          <div className="login-text">
+            Already have an account?{' '}
+            <Link to="/login">Back to Login</Link>
+          </div>
         </form>
-        <p className="login-text">
-          Already have an account? <a href="/login" style={{ color: '#3b82f6' }}>Login</a>
-        </p>
       </div>
     </div>
   );
