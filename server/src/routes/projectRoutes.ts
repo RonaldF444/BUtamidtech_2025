@@ -17,18 +17,39 @@ const prisma = new PrismaClient();
 // Create a new project - only admins can create projects
 router.post("/", authMiddleware, roleMiddleware(["admin"]), async (req: AuthRequest, res: Response) => {
   try {
-    console.log("Creating project, user:", req.user);
+    console.log("Creating project, request body:", req.body);
+    console.log("User making request:", req.user);
+    
     const { name, description } = req.body;
     
+    if (!name) {
+      console.log("Project creation failed: Name is required");
+      return res.status(400).json({ error: "Project name is required" });
+    }
+    
     const project = await prisma.projects.create({
-      data: { name, description }
+      data: { 
+        name, 
+        description: description || null 
+      }
     });
     
-    console.log("Project created successfully:", project.id);
+    console.log("Project created successfully:", project);
     res.status(201).json(project);
   } catch (error) {
     console.error("Error creating project:", error);
-    res.status(500).json({ error: "Error creating project", details: error instanceof Error ? error.message : "Unknown error" });
+    if (error instanceof Error) {
+      res.status(500).json({ 
+        error: "Error creating project", 
+        details: error.message,
+        type: error.constructor.name
+      });
+    } else {
+      res.status(500).json({ 
+        error: "Error creating project", 
+        details: "Unknown error occurred"
+      });
+    }
   }
 });
 

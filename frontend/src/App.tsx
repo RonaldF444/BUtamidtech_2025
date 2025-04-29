@@ -10,7 +10,8 @@ function App() {
   return (
     <div className="app-container">
       <Routes>
-        <Route path="/" element={<LoginPage />} />
+        <Route path="/" element={<HomeScreen />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<ProfilePage />} />
