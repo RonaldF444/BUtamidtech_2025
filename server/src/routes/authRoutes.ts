@@ -11,8 +11,9 @@ const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
 // Interface to extend Request with user property
 interface AuthRequest extends Request {
   user?: {
-    id: number;
+    user_id: number;
     role: string;
+    track: string;
   };
 }
 
@@ -38,7 +39,7 @@ const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => 
       return res.status(401).json({ message: "No token provided" });
     }
     
-    const decoded = jwt.verify(token, SECRET_KEY) as { id: number, role: string };
+    const decoded = jwt.verify(token, SECRET_KEY) as { user_id: number, role: string, track: string };
     req.user = decoded; // Attach user to request
     next();
   } catch (error) {
@@ -114,7 +115,7 @@ router.post("/login", async (req: Request, res: Response) => {
         }
 
         const token = jwt.sign(
-            { id: user.user_id, role: user.role }, 
+            { user_id: user.user_id, role: user.role, track: user.track }, 
             SECRET_KEY, 
             { expiresIn: "1h" }
         );
@@ -140,9 +141,9 @@ router.post("/login", async (req: Request, res: Response) => {
 // Get current user profile
 router.get("/profile", authMiddleware, async (req: AuthRequest, res: Response) => {
     try {
-        console.log("Profile request received, user ID:", req.user?.id);
+        console.log("Profile request received, user ID:", req.user?.user_id);
         
-        const userId = req.user?.id;
+        const userId = req.user?.user_id;
         if (!userId) {
             return res.status(401).json({ message: "User ID not found in token" });
         }

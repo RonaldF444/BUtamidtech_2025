@@ -429,7 +429,7 @@
 
 .project-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 8px;
   align-items: center;
 }
 
@@ -946,4 +946,79 @@
   background-color: #f9fafb;
   border-radius: 0.375rem;
   border: 1px dashed #e5e7eb;
+}
+
+.weight-button {
+  padding: 0.25rem 0.5rem;
+  background-color: #e5e7eb;
+  color: #374151;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.weight-button:hover {
+  background-color: #d1d5db;
+}
+
+.project-track {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin: 0 8px;
+  display: inline-block;
+  line-height: 1;
+}
+
+.track-education {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.track-consulting {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.track-tech {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.track-fund {
+  background-color: #f3e8ff;
+  color: #6b21a8;
+}
+
+.project-track.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background: none;
+}
+
+.project-track.clickable:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+.track-select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: #1f2937;
+  background-color: white;
+  cursor: pointer;
+}
+
+.track-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }

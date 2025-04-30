@@ -105,19 +105,29 @@
     font-weight: 500;
   }
   
-  .role-badge.admin {
+  .role-badge.president {
     background-color: #fecaca;
     color: #b91c1c;
   }
   
-  .role-badge.user {
-    background-color: #e0f2fe;
-    color: #0369a1;
+  .role-badge.director {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  
+  .role-badge.pm {
+    background-color: #dbeafe;
+    color: #1e40af;
   }
   
   .role-badge.member {
     background-color: #e0f2fe;
     color: #0369a1;
+  }
+  
+  .role-badge.client {
+    background-color: #f3f4f6;
+    color: #374151;
   }
   
   .profile-actions {

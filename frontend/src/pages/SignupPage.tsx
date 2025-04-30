@@ -9,6 +9,8 @@ const SignupPage = () => {
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState("member"); // Default to member role
+  const [track, setTrack] = useState("education"); // Default track
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -17,14 +19,14 @@ const SignupPage = () => {
     setError("");
     
     try {
-      console.log("Attempting signup with:", { email, username });
+      console.log("Attempting signup with:", { email, username, role, track });
       
       const response = await axios.post("http://localhost:3001/api/auth/register", {
         email,
         password,
         username,
-        role: "user",
-        track: "education" // Explicitly set the default track
+        role,
+        track
       });
       
       console.log("Signup response:", response.data);
@@ -32,7 +34,6 @@ const SignupPage = () => {
     } catch (err: any) {
       console.error("Signup error:", err);
       
-      // Display more specific error messages from the server if available
       if (err.response && err.response.data) {
         setError(err.response.data.error || err.response.data.details || "Signup failed. Please try again.");
       } else {
@@ -46,51 +47,79 @@ const SignupPage = () => {
   return (
     <div className="signup-container">
       <div className="signup-card">
-        <h2 className="signup-title">Sign Up</h2>
-        {error && <p className="error-message">{error}</p>}
+        <h1>Create Account</h1>
         <form onSubmit={handleSignup}>
           <div className="form-group">
             <label htmlFor="username">Username</label>
             <input
-              id="username"
               type="text"
+              id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              disabled={loading}
             />
           </div>
+          
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
-              id="email"
               type="email"
+              id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={loading}
             />
           </div>
+          
           <div className="form-group">
             <label htmlFor="password">Password</label>
             <input
-              id="password"
               type="password"
+              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              disabled={loading}
-              minLength={6}
             />
           </div>
-          <button type="submit" className="signup-button" disabled={loading}>
-            {loading ? "Signing Up..." : "Sign Up"}
-          </button>
-          <div className="login-text">
-            Already have an account?{' '}
-            <Link to="/login">Back to Login</Link>
+
+          <div className="form-group">
+            <label htmlFor="role">Role</label>
+            <select
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              required
+            >
+              <option value="member">Member</option>
+              <option value="client">Client</option>
+            </select>
           </div>
+
+          <div className="form-group">
+            <label htmlFor="track">Track</label>
+            <select
+              id="track"
+              value={track}
+              onChange={(e) => setTrack(e.target.value)}
+              required
+            >
+              <option value="education">Education</option>
+              <option value="consulting">Consulting</option>
+              <option value="technology">Technology</option>
+              <option value="finance">Finance</option>
+            </select>
+          </div>
+          
+          {error && <div className="error-message">{error}</div>}
+          
+          <button type="submit" className="signup-button" disabled={loading}>
+            {loading ? "Creating Account..." : "Sign Up"}
+          </button>
         </form>
+        
+        <p className="login-link">
+          Already have an account? <Link to="/login">Log in</Link>
+        </p>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ interface Project {
   name: string;
   description: string | null;
   created_at: string;
+  track: string;
   tasks: Task[];
 }
 
@@ -30,6 +31,41 @@ interface User {
   role: string;
   track: string;
 }
+
+// Helper function to check user permissions
+const hasPermission = (user: User | null, permission: string): boolean => {
+  if (!user) return false;
+  
+  switch (user.role) {
+    case 'president':
+      return true; // President has all permissions
+    case 'director':
+      return permission !== 'manageRoles';
+    case 'pm':
+      return permission !== 'manageRoles' && permission !== 'completeProjects';
+    case 'member':
+      return permission === 'view';
+    case 'client':
+      return permission === 'view';
+    default:
+      return false;
+  }
+};
+
+// Helper function to check if user can manage project
+const canManageProject = (user: User | null, projectTrack: string): boolean => {
+  if (!user) return false;
+  
+  switch (user.role) {
+    case 'president':
+      return true;
+    case 'director':
+    case 'pm':
+      return user.track === projectTrack;
+    default:
+      return false;
+  }
+};
 
 const DashboardHeader = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -66,7 +102,7 @@ const DashboardHeader = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    window.location.href = '/login';
+    window.location.href = '/';
   };
 
   // Get user initials for avatar
@@ -174,7 +210,11 @@ const Dashboard = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
-  const [newProject, setNewProject] = useState({ name: '', description: '' });
+  const [newProject, setNewProject] = useState({ 
+    name: '', 
+    description: '',
+    track: '' 
+  });
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
@@ -187,6 +227,9 @@ const Dashboard = () => {
   const [showTaskWeightModal, setShowTaskWeightModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskWeight, setTaskWeight] = useState<number>(1);
+  const [showTrackModal, setShowTrackModal] = useState(false);
+  const [selectedProjectForTrack, setSelectedProjectForTrack] = useState<Project | null>(null);
+  const [newTrack, setNewTrack] = useState('');
 
   useEffect(() => {
     // Fetch current user info
@@ -324,11 +367,11 @@ const Dashboard = () => {
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    setModalError(''); // Clear any previous errors
+    setModalError('');
     
     try {
-      if (!currentUser || currentUser.role !== 'admin') {
-        setModalError('Only administrators can create new projects.');
+      if (!currentUser || !hasPermission(currentUser, 'manageProjects')) {
+        setModalError('You do not have permission to create projects.');
         return;
       }
 
@@ -338,7 +381,10 @@ const Dashboard = () => {
         return;
       }
       
-      const response = await axios.post('http://localhost:3001/api/projects', newProject, {
+      const response = await axios.post('http://localhost:3001/api/projects', {
+        ...newProject,
+        track: currentUser.role === 'president' ? newProject.track : currentUser.track // Use selected track for president, user's track for others
+      }, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -347,7 +393,7 @@ const Dashboard = () => {
 
       // Immediately close the modal and reset form
       setShowCreateModal(false);
-      setNewProject({ name: '', description: '' });
+      setNewProject({ name: '', description: '', track: '' });
       setModalError('');
 
       // Update the projects list
@@ -538,18 +584,35 @@ const Dashboard = () => {
         return;
       }
 
-      // Toggle between 'completed' and 'in_progress'
-      const newStatus = currentStatus === 'completed' ? 'in_progress' : 'completed';
-      
-      console.log(`Updating task ${taskId} status to ${newStatus}`);
+      // Check if user has permission to complete tasks
+      if (!currentUser || !hasPermission(currentUser, 'completeTasks')) {
+        console.error('User does not have permission to complete tasks');
+        return;
+      }
 
-      const response = await axios.put(
+      // Handle both 'active' and 'pending' statuses
+      const newStatus = (currentStatus === 'completed' || currentStatus === 'active') ? 'pending' : 'completed';
+      
+      console.log('Task update request:', {
+        taskId,
+        projectId,
+        currentStatus,
+        newStatus,
+        taskDetails: {
+          title: currentTask.title,
+          description: currentTask.description,
+          due_date: currentTask.due_date
+        }
+      });
+
+      const response = await axios.patch(
         `http://localhost:3001/api/projects/${projectId}/tasks/${taskId}`,
         { 
           status: newStatus,
           title: currentTask.title,
           description: currentTask.description,
-          due_date: currentTask.due_date
+          due_date: currentTask.due_date,
+          weight: currentTask.weight
         },
         {
           headers: {
@@ -558,6 +621,8 @@ const Dashboard = () => {
           }
         }
       );
+
+      console.log('Server response:', response.data);
 
       if (response.data) {
         // Update the projects state with the new task status
@@ -577,8 +642,65 @@ const Dashboard = () => {
           })
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating task status:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Full error details:', {
+        message: error.message,
+        response: error.response,
+        request: error.request
+      });
+    }
+  };
+
+  const handleCompleteProject = async (projectId: number) => {
+    try {
+      if (!currentUser || !hasPermission(currentUser, 'completeProjects')) {
+        setError('You do not have permission to complete projects.');
+        return;
+      }
+
+      // ... rest of the complete project logic ...
+    } catch (error) {
+      // ... error handling ...
+    }
+  };
+
+  const handleTrackChange = async (projectId: number, newTrack: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      const response = await axios.patch(
+        `http://localhost:3001/api/projects/${projectId}`,
+        { track: newTrack },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      // Update the projects state with the new track
+      setProjects(prevProjects =>
+        prevProjects.map(project =>
+          project.id === projectId
+            ? { ...project, track: newTrack }
+            : project
+        )
+      );
+
+      setShowTrackModal(false);
+      setSelectedProjectForTrack(null);
+      setNewTrack('');
+    } catch (error) {
+      console.error('Error updating project track:', error);
+      setModalError('Failed to update project track. Please try again.');
     }
   };
 
@@ -669,7 +791,7 @@ const Dashboard = () => {
               <>
                 <div className="section-header">
               <h2 className="section-title">Active Projects</h2>
-                  {currentUser?.role === 'admin' && (
+                  {currentUser && hasPermission(currentUser, 'manageProjects') && (
                     <button 
                       className="create-project-button"
                       onClick={() => setShowCreateModal(true)}
@@ -691,21 +813,37 @@ const Dashboard = () => {
                     return (
                       <div key={project.id} className={`project-card ${status.toLowerCase()}`}>
                         <div className="project-header">
-                            <div className="project-info">
+                          <div className="project-info">
                             <h3 className="project-name">{project.name}</h3>
-                              <p className="project-client">{project.description}</p>
+                            <p className="project-client">{project.description}</p>
                           </div>
-                            <div className="project-actions">
-                          <span className={`project-status ${status.toLowerCase()}-status`}>
-                            {status}
-                          </span>
+                          <div className="project-actions">
+                            <span className={`project-status ${status.toLowerCase()}-status`}>
+                              {status}
+                            </span>
+                            {currentUser?.role === 'president' ? (
                               <button
-                                className="delete-project-button"
-                                onClick={() => handleDeleteClick(project.id)}
+                                className={`project-track track-${project.track.toLowerCase()} clickable`}
+                                onClick={() => {
+                                  setSelectedProjectForTrack(project);
+                                  setNewTrack(project.track);
+                                  setShowTrackModal(true);
+                                }}
                               >
-                                Delete
+                                {project.track.charAt(0).toUpperCase() + project.track.slice(1)}
                               </button>
-                            </div>
+                            ) : (
+                              <span className={`project-track track-${project.track.toLowerCase()}`}>
+                                {project.track.charAt(0).toUpperCase() + project.track.slice(1)}
+                              </span>
+                            )}
+                            <button
+                              className="delete-project-button"
+                              onClick={() => handleDeleteClick(project.id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
                         
                         <div className="project-progress">
@@ -740,7 +878,7 @@ const Dashboard = () => {
                             <div className="active-tasks">
                               <h4 className="tasks-title">Active Tasks</h4>
                               {project.tasks
-                                .filter(task => task.status !== 'completed')
+                                .filter(task => task.status === 'pending' || task.status === 'active')
                                 .map(task => (
                                   <div key={task.id} className="task-item">
                                     <div className="task-header">
@@ -748,7 +886,7 @@ const Dashboard = () => {
                                         <input
                                           type="checkbox"
                                           checked={task.status === 'completed'}
-                                          onChange={() => handleToggleTaskStatus(task.id, project.id, task.status || 'in_progress')}
+                                          onChange={() => handleToggleTaskStatus(task.id, project.id, task.status)}
                                           className="task-checkbox"
                                         />
                                         <span className="task-title">{task.title}</span>
@@ -774,7 +912,7 @@ const Dashboard = () => {
                                     )}
                                   </div>
                                 ))}
-                              {project.tasks.filter(task => task.status !== 'completed').length === 0 && (
+                              {project.tasks.filter(task => task.status === 'pending' || task.status === 'active').length === 0 && (
                                 <p className="no-tasks-message">No active tasks</p>
                               )}
                             </div>
@@ -919,6 +1057,22 @@ const Dashboard = () => {
                       onChange={(e) => setNewProject({...newProject, description: e.target.value})}
                     />
                   </div>
+                  {currentUser?.role === 'president' && (
+                    <div className="form-group">
+                      <label>Track</label>
+                      <select
+                        value={newProject.track}
+                        onChange={(e) => setNewProject({...newProject, track: e.target.value})}
+                        required
+                      >
+                        <option value="">Select a track</option>
+                        <option value="education">Education</option>
+                        <option value="consulting">Consulting</option>
+                        <option value="tech">Tech</option>
+                        <option value="fund">Fund</option>
+                      </select>
+                    </div>
+                  )}
                   <div className="modal-buttons">
                     <button type="submit" className="submit-button">Create</button>
                     <button 
@@ -1041,6 +1195,46 @@ const Dashboard = () => {
                       setShowTaskWeightModal(false);
                       setSelectedTask(null);
                       setTaskWeight(1);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Add Track Change Modal */}
+          {showTrackModal && selectedProjectForTrack && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <h3>Change Project Track</h3>
+                <div className="form-group">
+                  <label>Select New Track</label>
+                  <select
+                    value={newTrack}
+                    onChange={(e) => setNewTrack(e.target.value)}
+                    className="track-select"
+                  >
+                    <option value="education">Education</option>
+                    <option value="consulting">Consulting</option>
+                    <option value="tech">Tech</option>
+                    <option value="fund">Fund</option>
+                  </select>
+                </div>
+                <div className="modal-buttons">
+                  <button
+                    className="submit-button"
+                    onClick={() => handleTrackChange(selectedProjectForTrack.id, newTrack)}
+                  >
+                    Update Track
+                  </button>
+                  <button
+                    className="cancel-button"
+                    onClick={() => {
+                      setShowTrackModal(false);
+                      setSelectedProjectForTrack(null);
+                      setNewTrack('');
                     }}
                   >
                     Cancel
