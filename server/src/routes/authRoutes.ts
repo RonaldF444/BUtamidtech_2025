@@ -1,6 +1,5 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 
@@ -53,12 +52,11 @@ router.post("/register", async (req: Request, res: Response) => {
         const { email, password, role, username, track = "education" } = req.body;
         console.log("Registration attempt:", { email, username, role, track });
         
-        const hashedPassword = await bcrypt.hash(password, 10);
-
+        // Store password as plain text (temporarily)
         const user = await prisma.users.create({
             data: { 
                 email, 
-                password: hashedPassword, 
+                password: password, // No hashing
                 role: role || "user", 
                 username,
                 track
@@ -107,8 +105,8 @@ router.post("/login", async (req: Request, res: Response) => {
             return res.status(401).json({ message: "Invalid email or password" });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
+        // Compare passwords directly (no hashing)
+        if (password !== user.password) {
             console.log("Login failed: Password doesn't match");
             return res.status(401).json({ message: "Invalid email or password" });
         }
